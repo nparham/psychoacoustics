@@ -15,15 +15,27 @@
 #include "Mikro.h"
 #include "AlphaFont.h"
 
-unsigned int colors[14];
-long XPIXEL;
-long YPIXEL;
-long oldXPIXEL;
-long oldYPIXEL;
 uint16 ROWy;              // Row and column pixel positions for
 uint16 COLx;              // Display and DisplayChar functions
 
 void SetReg(uint8 index, uint8 value);
+
+/****** Pause **********************************************************
+*
+* This function pauses for 10*Param microseconds
+* for any value of Param from 1 to 65535.
+**********************************************************************/
+void Pause(uint16 param)
+{
+   uint16 ctr;
+
+   while (--param) {
+      ctr = 38;
+	  while (--ctr) ;
+   }
+   ctr = 35;
+   while (--ctr) ;               // Need 9 more microseconds
+}
 
 /****** InitBackground *************************************************
  *
