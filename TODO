@@ -1,0 +1,5 @@
+TODO:
+
+-refactor MikroPot and MikroTouch to be used by potcontrol demo
+-finalize SPI config for MCP42xxx
+-set up i2c interface for use with grid-EYE
