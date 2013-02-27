@@ -4,11 +4,12 @@
  *
  * This code was developed by Andy Harazin.
  **********************************************************************/
+
+#include "p24FJ256GB110.h"       // PIC24 register and bit definitions
+#include "Mikro.h"
+#include "MikroTouch.h"
  
 /****** Function prototypes *******************************************/
-void DetectTouch(void);
-void MoveSlider(void);
-void ADCsetup(void);
 int GetX(void);
 int GetY(void);
 
@@ -124,3 +125,61 @@ int GetY(void)
    YPIXEL = (((long) ADC1BUF0 * 240) - 20640) / 790;
    return YPIXEL;
 }
+
+
+/****** InitPot ********************************************************
+ *
+ * Create initial screen potentiometer
+ *
+ **********************************************************************/
+void InitPot()
+{
+   DrawRectangle(0, 205, 320, 240, WHITE);
+   // rectangle in bottom part to be black
+   DrawRectangle(10, 215, 310, 230, BLACK);
+   // initializes value to zero for reading
+   DrawRectangle(10, 215, 25, 230, BKGD);
+}
+
+
+/****** MoveSlider *****************************************************
+ *
+ * Moves the slider around on touch
+ *
+ **********************************************************************/
+void MoveSlider()
+{
+   static int sliderVal = 25;
+   static int oldSliderVal = 25;
+
+   if (tsy >= 205 && tsy <= 230)
+   {
+      if (tsx != -1)
+      {
+         sliderVal = tsx;
+         if (sliderVal < 25)
+            sliderVal = 25;
+         if (sliderVal > 310)
+            sliderVal = 310;
+      }
+   }
+   if (sliderVal != oldSliderVal)
+   {
+      _LATF12 = 0;               // Enable display;
+      DrawRectangle(oldSliderVal - 15, 215, oldSliderVal, 230, BLACK);
+      DrawRectangle(sliderVal - 15, 215, sliderVal, 230, BKGD);
+      _LATF12 = 1;               // Disable display;
+      scaledSliderVal = (((long) sliderVal * 255) - 7650) / 270;
+      if (scaledSliderVal < 0)
+         scaledSliderVal = 0;
+      else if (scaledSliderVal > 0xFF)
+         scaledSliderVal = 0xFF;
+      LONGNUM = scaledSliderVal;
+      ASCIIn(3, Potstr);
+      Display(Potstr);           // Display pot value
+
+      oldSliderVal = sliderVal;
+      oldScaledSliderVal = scaledSliderVal;
+   }
+}
+

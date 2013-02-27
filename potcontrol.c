@@ -3,6 +3,7 @@
 #include "p24FJ256GB110.h"
 #include "MCP42xxx.h"
 #include "Mikro.h"
+#include "MikroTouch.h"
 
 /* set up MCP42xxx device handles */
 MCP42xxx_device_handle chip0 = 0;
@@ -27,6 +28,7 @@ int main()
    PR5 = 19999;                  // Set period of Timer5 to 10 ms
    T5CON = 0x8010;               // Clock Timer5 with Fcy/8 = 2 MHz
 
+   ADCsetup();
    MCP42xxxInit(); 
    /* end initialization*/
 
