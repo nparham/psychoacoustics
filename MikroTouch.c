@@ -2,26 +2,20 @@
  *
  * Touchscreen variables and functions
  *
- * This code was developed by Andy Harazin.
+ * This code was developed by Andy Harazin
+ * Modified by Tyler Fultz 2/8/13
+ *  -Added Macros
+ *  -Added DetectBox
  **********************************************************************/
-
-#include "p24FJ256GB110.h"       // PIC24 register and bit definitions
-#include "Mikro.h"
 #include "MikroTouch.h"
- 
-/****** Function prototypes *******************************************/
-int GetX(void);
-int GetY(void);
 
 /***********************************************************************
  * Global variables
  **********************************************************************/
-long XADC;
-long YADC;
-long tsx = -1;
-long tsy = -1;
-int oldScaledSliderVal = 0;
-int scaledSliderVal = 0;
+sint32 XADC;
+sint32 YADC;
+sint32 tsx = -1;
+sint32 tsy = -1;
 
 /****** DetectTouch ****************************************************
  *
@@ -75,7 +69,7 @@ void ADCsetup(void)
  *
  * Get the X position, XPIXEL, of the current touch on the touch screen
  **********************************************************************/
-int GetX(void)
+sint16 GetX(void)
 {
    ADCsetup();
    _PCFG13 = 0;                  // Set up vertical pins for reading analog inputs
@@ -94,7 +88,7 @@ int GetX(void)
    while (!_DONE) ;              // Wait for conversion to be completed
 
 // XPIXEL = (893x320 - 320*XADC)/(893-78)
-   XPIXEL = ((((long) 285760)) - ((long) ADC1BUF0 * 320)) / 815;
+   uint32 XPIXEL = ((((long) 285760)) - ((long) ADC1BUF0 * 320)) / 815;
    return XPIXEL;
 }
 
@@ -102,7 +96,7 @@ int GetX(void)
  *
  * Get the Y position, YPIXEL, of the current touch on the touch screen
  **********************************************************************/
-int GetY(void)
+sint16 GetY(void)
 {
    ADCsetup();
 
@@ -121,65 +115,54 @@ int GetY(void)
    AD1CHS = 0x0C;                // Sample YU input
    _SAMP = 1;
    while (!_DONE) ;              // Wait for conversion to be completed
-// YPIXEL = (240*YADC - 240*86)/(876-86)
-   YPIXEL = (((long) ADC1BUF0 * 240) - 20640) / 790;
+   //YPIXEL = (240*YADC - 240*86)/(876-86)
+   uint32 YPIXEL = (((long) ADC1BUF0 * 240) - ((long)20640)) / 790;
    return YPIXEL;
 }
 
-
-/****** InitPot ********************************************************
+/******DetectRectangle ************************************************
  *
- * Create initial screen potentiometer
- *
+ * Returns a positive value if touch is inside box
+ * Value is 1 if touched inside, 0 if not
  **********************************************************************/
-void InitPot()
-{
-   DrawRectangle(0, 205, 320, 240, WHITE);
-   // rectangle in bottom part to be black
-   DrawRectangle(10, 215, 310, 230, BLACK);
-   // initializes value to zero for reading
-   DrawRectangle(10, 215, 25, 230, BKGD);
+uint8 DetectRectangle(int xmin,int ymin,int xmax,int ymax){
+
+    if((tsx >= 0 && tsy >= 0) &&
+       (tsx >= xmin && tsx <= xmax) &&
+       (tsy >= ymin && tsy <= ymax)){
+
+        return 1;
+
+    } else{
+
+        return 0;
+
+    }
+
 }
 
-
-/****** MoveSlider *****************************************************
+/******DetectChar *****************************************************
  *
- * Moves the slider around on touch
- *
+ * Returns a positive value if touch is inside Char space defined in
+ * Mikro.c
+ * Value is 1 if touched inside, 0 if not
  **********************************************************************/
-void MoveSlider()
+uint8 DetectChar(char* strDetect)
 {
-   static int sliderVal = 25;
-   static int oldSliderVal = 25;
-
-   if (tsy >= 205 && tsy <= 230)
-   {
-      if (tsx != -1)
-      {
-         sliderVal = tsx;
-         if (sliderVal < 25)
-            sliderVal = 25;
-         if (sliderVal > 310)
-            sliderVal = 310;
-      }
+   uint8 StartCharY = strDetect[0];
+   uint8 StartCharX = strDetect[1];
+   uint8 NumChar = 0;
+   strDetect += 2;
+   
+   while(*(strDetect++) != 0){
+       NumChar++;
    }
-   if (sliderVal != oldSliderVal)
-   {
-      _LATF12 = 0;               // Enable display;
-      DrawRectangle(oldSliderVal - 15, 215, oldSliderVal, 230, BLACK);
-      DrawRectangle(sliderVal - 15, 215, sliderVal, 230, BKGD);
-      _LATF12 = 1;               // Disable display;
-      scaledSliderVal = (((long) sliderVal * 255) - 7650) / 270;
-      if (scaledSliderVal < 0)
-         scaledSliderVal = 0;
-      else if (scaledSliderVal > 0xFF)
-         scaledSliderVal = 0xFF;
-      LONGNUM = scaledSliderVal;
-      ASCIIn(3, Potstr);
-      Display(Potstr);           // Display pot value
 
-      oldSliderVal = sliderVal;
-      oldScaledSliderVal = scaledSliderVal;
-   }
+   uint8 xstart = (StartCharX)*12 - 7;
+   uint8 ystart = (StartCharY)*24 - 19;
+   uint8 xstop  = xstart+NumChar*12;
+   uint8 ystop  = ystart+1*16;
+
+   return DetectRectangle(xstart,ystart,xstop,ystop);
+
 }
-
