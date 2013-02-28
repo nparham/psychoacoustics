@@ -76,7 +76,7 @@ void PMP_Init()
 
    _RC1 = 1;                     // release from reset
 
-   Delay(20);
+   Pause(20);
 }
 
 /****** SetReg *********************************************************
@@ -116,11 +116,11 @@ void LCD_Init()
       SetReg(lcd_reg[q], lcd_val[q]);
       if ((lcd_reg[q]) == 0x1F)  // 0x1f register needs a short delay
       {
-         Delay(500);
+         Pause(500);
       }
       q++;
    }
-   Delay(4000);                  // 0x38 requires a long delay
+   Pause(4000);                  // 0x38 requires a long delay
    SetReg(0x28, 0x3C);
 }
 

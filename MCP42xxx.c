@@ -22,13 +22,13 @@
 
 void SPI_Init();
 void SPI_Clock_Speed(uint8 pri_prescale, uint8 sec_prescale);
-uint8 SPIwrite(uint8 data);
+uint16 SPIwrite(uint16 data);
 
 /*******************/
 /* DEVICE-SPECIFIC */
 /*******************/
 
-void Select(struct MCP42xxx_device_handle device)
+void Select(MCP42xxx_device_handle device)
 {
 	switch (device) {
 		case 0:
@@ -40,7 +40,7 @@ void Select(struct MCP42xxx_device_handle device)
 	}
 }
 
-void Deselect(struct MCP42xxx_device_handle device)
+void Deselect(MCP42xxx_device_handle device)
 {
 	switch (device) {
 		case 0:
@@ -60,7 +60,7 @@ void MCP42xxxInit()
 	// TODO: set clock frequency with SPI_Clock_Speed()
 }
 
-void MCP42xxx_setResistance(uint8 potnum, uint8 resistance, struct MCP42xxx_device_handle device)
+void MCP42xxx_setResistance(uint8 potnum, uint8 resistance, MCP42xxx_device_handle device)
 {
 	// passing the value 2 for potnum will select both pots.
 

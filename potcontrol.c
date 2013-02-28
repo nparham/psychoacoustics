@@ -15,8 +15,6 @@ _CONFIG2(PLLDIV_DIV2 & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF);
 
 int main()
 {
-
-   unsigned int looptime = 0;
    Slider slider0, slider1, slider2, slider3;
 
    /* initialization */
